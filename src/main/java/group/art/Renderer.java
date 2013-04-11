@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 
 public class Renderer {
 
+    private final DecoratorOverrides overides;
     private String from;
     private String to;
 
@@ -31,10 +32,13 @@ public class Renderer {
       new Type("\\/\\*", "\\*\\/", "/*", "*/") // JavaScript multi-line comments
     };
 
-
-    public Renderer(String from, String to) {
+    public Renderer(DecoratorOverrides overides, String from, String to) {
+        this.overides = overides;
         this.from = from;
         this.to = to;
+    }
+    public Renderer(String from, String to) {
+        this(DecoratorOverrides.NULL, from, to);
     }
 
     public String getPage(String file, Map<String, String> replacements) throws FileNotFoundException {
@@ -45,7 +49,9 @@ public class Renderer {
         Pattern decorateWith = Pattern.compile("<!--decorateWith:(.*\\w)-->");
         Matcher matcher = decorateWith.matcher(content);
         if (matcher.find()) {
-            return new Renderer(from, to).getPage(matcher.group(1), newReplacements(replacements, content));
+            String decorator = matcher.group(1);
+            decorator = overides.override(decorator);
+            return new Renderer(from, to).getPage(decorator, newReplacements(replacements, content));
         }
         return content;
     }

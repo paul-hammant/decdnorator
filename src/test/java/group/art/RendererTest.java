@@ -79,5 +79,18 @@ public class RendererTest {
                 "</html>\n", renderer.getPage("has_two_angular_controllers.html", makeMap().put("Greet", "").put("GreetJs", "").put("List", "").put("ListJs", "").build()));
     }
 
+    @Test
+    public void secondDecoratorShouldBeOverridable() throws FileNotFoundException {
+        Renderer renderer = new Renderer(new DecoratorOverrides() {
+            public String override(String decorator) {
+                return decorator.replace("has_replacements.txt","banana.txt" );
+            }
+        }, "target/classes", "src/main/webapp/WEB-INF");
+        assertEquals("Mary <[Had]> A <[Little]> Lamb",
+                renderer.getPage("has_replacements_and_second_decorator.txt",
+                        makeMap().put("AA", "Had").put("BB", "Little").build()));
+    }
+
+
 
 }
