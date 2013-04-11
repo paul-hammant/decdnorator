@@ -1,0 +1,4 @@
+<!--decorateWith:has_replacements.txt-->
+/*block:AA*/[/*insert:AA*/]/*endblock:AA*/
+this bit goes nowhere
+/*block:BB*/[/*insert:BB*/]/*endblock:BB*/

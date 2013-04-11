@@ -1,0 +1,40 @@
+<!doctype html>
+<!--decorateWith:adds_a_header_and_footer_for_mixed_example.html-->
+<html ng-app>
+  <head>
+    <script src="http://code.angularjs.org/1.0.5/angular.min.js"></script>
+    <style>
+        .ng-scope  {
+            border: 1px solid red;
+            margin: 3px;
+        }
+    </style>
+    <script>
+      function GreetCtrl($scope) {
+        /*block:GreetJs*/
+        $scope.name = 'World';
+        /*endblock:GreetJs*/
+      }
+
+      function ListCtrl($scope) {
+        /*block:ListJs*/
+        $scope.names = ['Igor', 'Misko', 'Vojta'];
+        /*endblock:ListJs*/
+      }
+    </script>
+  </head>
+  <body>
+    <div ng-controller="GreetCtrl">
+      <!--block:Greet-->
+      Hello {{name}}!
+      <!--endblock:Greet-->
+    </div>
+    <div ng-controller="ListCtrl">
+      <!--block:List-->
+      <ol>
+        <li ng-repeat="name in names">{{name}}</li>
+      </ol>
+      <!--endblock:List-->
+    </div>
+  </body>
+</html>
