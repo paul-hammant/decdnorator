@@ -8,23 +8,18 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.HashMap;
 
-public class FooFilter implements Filter {
+public class ExampleFilter implements Filter {
 
-    private Renderer r = new Renderer("", "");
-    private Selector s = new Selector() {
-        public String getPageName(String requestURI) {
-            return requestURI;
-        }
-    };
-
+    private Renderer renderer = new Renderer("", "");
 
     public void init(FilterConfig filterConfig) throws ServletException {
     }
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         String requestURI = ((HttpServletRequest) request).getRequestURI();
-        response.getWriter().write(r.getPage(s.getPageName(requestURI), null));
+        response.getWriter().write(renderer.getPage(requestURI, new HashMap<String, String>()));
     }
 
     public void destroy() {
