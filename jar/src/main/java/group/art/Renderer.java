@@ -43,6 +43,14 @@ public class Renderer {
         this(clazz, DecoratorOverrides.NULL, from, to);
     }
 
+    public String getPage(String file, String... insertionVars) throws FileNotFoundException {
+        Map<String, String> insertions = new HashMap<String, String>();
+        for (String insertionVar : insertionVars) {
+            insertions.put(insertionVar, "");
+        }
+        return getPage(file, insertions);
+    }
+
     public String getPage(String file, Map<String, String> insertions) throws FileNotFoundException {
         String content = getRawContent(clazz, file);
         content = performInsertions(insertions, content);

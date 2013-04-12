@@ -43,7 +43,7 @@ public class RendererTest {
     @Test
     public void decoratesAngularPageWithTwoControllersIntoOne() throws FileNotFoundException {
         Renderer renderer = new Renderer(RendererTest.class, "target/classes", "src/test/resources");
-        String page = renderer.getPage("has_two_angular_controllers.html", makeMap().put("Greet", "").put("GreetJs", "").put("List", "").put("ListJs", "").build());
+        String page = renderer.getPage("has_two_angular_controllers.html", "Greet", "GreetJs", "List", "ListJs");
         assertEquals("<!doctype html>\n" +
                 "<html ng-app>\n" +
                 "  <head>\n" +
