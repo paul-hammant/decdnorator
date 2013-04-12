@@ -19,7 +19,15 @@ public class ExampleFilter implements Filter {
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         String requestURI = ((HttpServletRequest) request).getRequestURI();
-        response.getWriter().write(renderer.getPage(requestURI, new HashMap<String, String>()));
+        // you determine that you should do the cacheable page
+        if (true == false) {
+            String page = renderer.getPage(requestURI, new HashMap<String, String>());
+            response.setContentType("text/html");
+
+            response.getWriter().write(page);
+        } else {
+            chain.doFilter(request, response);
+        }
     }
 
     public void destroy() {

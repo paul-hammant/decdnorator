@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 public class Renderer {
 
-    private final DecoratorOverrides overides;
+    private final DecoratorOverrides overrides;
     private String from;
     private String to;
 
@@ -33,7 +33,7 @@ public class Renderer {
     };
 
     public Renderer(DecoratorOverrides overides, String from, String to) {
-        this.overides = overides;
+        this.overrides = overides;
         this.from = from;
         this.to = to;
     }
@@ -42,44 +42,52 @@ public class Renderer {
     }
 
     public String getPage(String file, Map<String, String> replacements) throws FileNotFoundException {
-        String path = getClass().getProtectionDomain().getCodeSource().getLocation().getFile();
-        path = path.replace(from, to);
-        String content = new Scanner(new File(path, file), "UTF-8").useDelimiter("\\A").next();
-        content = performReplacements(replacements, content);
+        String content = getRawContent(file);
+        content = performInsertions(replacements, content);
         Pattern decorateWith = Pattern.compile("<!--decorateWith:(.*\\w)-->");
         Matcher matcher = decorateWith.matcher(content);
         if (matcher.find()) {
             String decorator = matcher.group(1);
-            decorator = overides.override(decorator);
-            return new Renderer(from, to).getPage(decorator, newReplacements(replacements, content));
+            decorator = overrides.override(decorator);
+            return new Renderer(from, to).getPage(decorator, extractInserts(replacements, content));
         }
         return content;
     }
 
-    private String performReplacements(Map<String, String> replacements, String content) {
-        for (String from : replacements.keySet()) {
-            String to = replacements.get(from);
-            for (Type type : types) {
-                content = content.replace(type.start + "insert:" + from + type.end, to);
-            }
+    public String getRawContent(String file) throws FileNotFoundException {
+        String path = getClass().getProtectionDomain().getCodeSource().getLocation().getFile();
+        path = path.replace(from, to);
+        return new Scanner(new File(path, file), "UTF-8").useDelimiter("\\A").next();
+    }
+
+    private String performInsertions(Map<String, String> inserts, String content) {
+        for (String from : inserts.keySet()) {
+            content = performInsert(content, from, inserts.get(from));
         }
         return content;
     }
 
-    private HashMap<String, String> newReplacements(Map<String, String> replacements, String content) {
-        HashMap<String, String> newReplacements = new HashMap<String, String>(replacements);
+    private String performInsert(String content, String from, String to) {
         for (Type type : types) {
-            for (String from : replacements.keySet()) {
+            content = content.replace(type.start + "insert:" + from + type.end, to);
+        }
+        return content;
+    }
+
+    public HashMap<String, String> extractInserts(Map<String, String> inserts, String content) {
+        HashMap<String, String> newInserts = new HashMap<String, String>(inserts);
+        for (Type type : types) {
+            for (String from : inserts.keySet()) {
                 String regex = type.startEsc + "block:" + from + type.endEsc + "(.*)" + type.startEsc + "endblock:" + from + type.endEsc;
                 Matcher matcher2 = Pattern.compile(regex, Pattern.DOTALL).matcher(content);
                 if (matcher2.find()) {
                     String group = matcher2.group(1);
                     group = group.replaceAll("\\s+$", "");
                     group = group.replaceAll("^\\n", "");
-                    newReplacements.put(from, group);
+                    newInserts.put(from, group);
                 }
             }
         }
-        return newReplacements;
+        return newInserts;
     }
 }

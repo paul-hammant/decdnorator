@@ -5,22 +5,17 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 
 import java.io.FileNotFoundException;
+import java.util.HashMap;
 
 import static junit.framework.Assert.assertEquals;
 
 public class RendererTest {
 
     @Test
-    public void fileContentsShouldBeRetrievable() throws FileNotFoundException {
-        Renderer renderer = new Renderer("target/classes", "src/main/webapp/WEB-INF");
-        ImmutableMap<String, String> build = makeMap().build();
-        assertEquals("bar", renderer.getPage("foo.txt", build));
-    }
-
-    @Test
     public void simpleHtmlStyleReplacementsShouldBeMade() throws FileNotFoundException {
         Renderer renderer = new Renderer("target/classes", "src/main/webapp/WEB-INF");
-        assertEquals("Mary Had A Little Lamb", renderer.getPage("has_replacements.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
+        assertEquals("Mary Had A Little Lamb", renderer
+                .getPage("has_replacements.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
     }
 
     private ImmutableMap.Builder<String, String> makeMap() {
@@ -48,6 +43,7 @@ public class RendererTest {
     @Test
     public void decoratesAngularPageWithTwoControllersIntoOne() throws FileNotFoundException {
         Renderer renderer = new Renderer("target/classes", "src/main/webapp/WEB-INF");
+        String page = renderer.getPage("has_two_angular_controllers.html", makeMap().put("Greet", "").put("GreetJs", "").put("List", "").put("ListJs", "").build());
         assertEquals("<!doctype html>\n" +
                 "<html ng-app>\n" +
                 "  <head>\n" +
@@ -76,7 +72,7 @@ public class RendererTest {
                 "    </div>\n" +
                 "    <h1>Contact us as /dev/null</h1>\n" +
                 "  </body>\n" +
-                "</html>\n", renderer.getPage("has_two_angular_controllers.html", makeMap().put("Greet", "").put("GreetJs", "").put("List", "").put("ListJs", "").build()));
+                "</html>\n", page);
     }
 
     @Test
@@ -91,6 +87,18 @@ public class RendererTest {
                         makeMap().put("AA", "Had").put("BB", "Little").build()));
     }
 
-
+    @Test
+    public void extractInsertsShouldExtractVariables() throws FileNotFoundException {
+        Renderer renderer = new Renderer("target/classes", "src/main/webapp/WEB-INF");
+        HashMap<String, String> vars = renderer.extractInserts(makeMap().put("AA", "").put("BB", "").build(),
+                "sdkjfhasdkfhjaksdjfh" +
+                "qweqwe<!--block:AA-->AaAa<!--endblock:AA-->fghfgh\n" +
+                "this bit goes nowhere\n" +
+                "werwer<!--block:BB-->BbBb<!--endblock:BB-->dfgdfg\n" +
+                "sdkjfhasdkfhjaksdjfh");
+        assertEquals(2, vars.size());
+        assertEquals("AaAa", vars.get("AA"));
+        assertEquals("BbBb", vars.get("BB"));
+    }
 
 }
