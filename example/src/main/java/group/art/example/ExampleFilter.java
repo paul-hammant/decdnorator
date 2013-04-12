@@ -28,7 +28,12 @@ public class ExampleFilter implements Filter {
         // you determine that you should do the cacheable page
         System.err.println("rui: "+ pageName);
         if (pageName.startsWith("has_two_angular_controllers.html")) {
-            String page = renderer.getPage(pageName, new HashMap<String, String>());
+            HashMap<String, String> insertions = new HashMap<String, String>();
+            insertions.put("Greet", "");
+            insertions.put("GreetJs", "");
+            insertions.put("List", "");
+            insertions.put("ListJs", "");
+            String page = renderer.getPage(pageName, insertions);
             response.setContentType("text/html");
 
             response.getWriter().write(page);
