@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 
 public class Renderer {
 
+    private final Class clazz;
     private final DecoratorOverrides overrides;
     private String from;
     private String to;
@@ -32,30 +33,31 @@ public class Renderer {
       new Type("\\/\\*", "\\*\\/", "/*", "*/") // JavaScript multi-line comments
     };
 
-    public Renderer(DecoratorOverrides overides, String from, String to) {
+    public Renderer(Class clazz, DecoratorOverrides overides, String from, String to) {
+        this.clazz = clazz;
         this.overrides = overides;
         this.from = from;
         this.to = to;
     }
-    public Renderer(String from, String to) {
-        this(DecoratorOverrides.NULL, from, to);
+    public Renderer(Class clazz, String from, String to) {
+        this(clazz, DecoratorOverrides.NULL, from, to);
     }
 
-    public String getPage(String file, Map<String, String> replacements) throws FileNotFoundException {
-        String content = getRawContent(file);
-        content = performInsertions(replacements, content);
+    public String getPage(String file, Map<String, String> insertions) throws FileNotFoundException {
+        String content = getRawContent(clazz, file);
+        content = performInsertions(insertions, content);
         Pattern decorateWith = Pattern.compile("<!--decorateWith:(.*\\w)-->");
         Matcher matcher = decorateWith.matcher(content);
         if (matcher.find()) {
             String decorator = matcher.group(1);
             decorator = overrides.override(decorator);
-            return new Renderer(from, to).getPage(decorator, extractInserts(replacements, content));
+            return new Renderer(clazz, from, to).getPage(decorator, extractInserts(insertions, content));
         }
         return content;
     }
 
-    public String getRawContent(String file) throws FileNotFoundException {
-        String path = getClass().getProtectionDomain().getCodeSource().getLocation().getFile();
+    protected String getRawContent(Class clazz, String file) throws FileNotFoundException {
+        String path = clazz.getProtectionDomain().getCodeSource().getLocation().getFile();
         path = path.replace(from, to);
         return new Scanner(new File(path, file), "UTF-8").useDelimiter("\\A").next();
     }

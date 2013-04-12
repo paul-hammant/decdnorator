@@ -13,7 +13,7 @@ public class RendererTest {
 
     @Test
     public void simpleHtmlStyleReplacementsShouldBeMade() throws FileNotFoundException {
-        Renderer renderer = new Renderer("target/classes", "src/main/webapp/WEB-INF");
+        Renderer renderer = new Renderer(RendererTest.class, "target/classes", "src/test/resources");
         assertEquals("Mary Had A Little Lamb", renderer
                 .getPage("has_replacements.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
     }
@@ -24,25 +24,25 @@ public class RendererTest {
 
     @Test
     public void simpleJavaScriptStyleReplacementsShouldBeMade() throws FileNotFoundException {
-        Renderer renderer = new Renderer("target/classes", "src/main/webapp/WEB-INF");
+        Renderer renderer = new Renderer(RendererTest.class, "target/classes", "src/test/resources");
         assertEquals("Mary Had A Little Lamb", renderer.getPage("has_replacements_js.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
     }
 
     @Test
     public void secondDecoratorShouldBeProcessedForHtmlStyle() throws FileNotFoundException {
-        Renderer renderer = new Renderer("target/classes", "src/main/webapp/WEB-INF");
+        Renderer renderer = new Renderer(RendererTest.class, "target/classes", "src/test/resources");
         assertEquals("Mary [Had] A [Little] Lamb", renderer.getPage("has_replacements_and_second_decorator.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
     }
 
     @Test
     public void secondDecoratorShouldBeProcessedForJavaScriptStyle() throws FileNotFoundException {
-        Renderer renderer = new Renderer("target/classes", "src/main/webapp/WEB-INF");
+        Renderer renderer = new Renderer(RendererTest.class, "target/classes", "src/test/resources");
         assertEquals("Mary [Had] A [Little] Lamb", renderer.getPage("has_replacements_and_second_decorator_js.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
     }
 
     @Test
     public void decoratesAngularPageWithTwoControllersIntoOne() throws FileNotFoundException {
-        Renderer renderer = new Renderer("target/classes", "src/main/webapp/WEB-INF");
+        Renderer renderer = new Renderer(RendererTest.class, "target/classes", "src/test/resources");
         String page = renderer.getPage("has_two_angular_controllers.html", makeMap().put("Greet", "").put("GreetJs", "").put("List", "").put("ListJs", "").build());
         assertEquals("<!doctype html>\n" +
                 "<html ng-app>\n" +
@@ -77,11 +77,11 @@ public class RendererTest {
 
     @Test
     public void secondDecoratorShouldBeOverridable() throws FileNotFoundException {
-        Renderer renderer = new Renderer(new DecoratorOverrides() {
+        Renderer renderer = new Renderer(RendererTest.class, new DecoratorOverrides() {
             public String override(String decorator) {
                 return decorator.replace("has_replacements.txt","banana.txt" );
             }
-        }, "target/classes", "src/main/webapp/WEB-INF");
+        }, "target/classes", "src/test/resources");
         assertEquals("Mary <[Had]> A <[Little]> Lamb",
                 renderer.getPage("has_replacements_and_second_decorator.txt",
                         makeMap().put("AA", "Had").put("BB", "Little").build()));
@@ -89,7 +89,7 @@ public class RendererTest {
 
     @Test
     public void extractInsertsShouldExtractVariables() throws FileNotFoundException {
-        Renderer renderer = new Renderer("target/classes", "src/main/webapp/WEB-INF");
+        Renderer renderer = new Renderer(RendererTest.class, "target/classes", "src/test/resources");
         HashMap<String, String> vars = renderer.extractInserts(makeMap().put("AA", "").put("BB", "").build(),
                 "sdkjfhasdkfhjaksdjfh" +
                 "qweqwe<!--block:AA-->AaAa<!--endblock:AA-->fghfgh\n" +
