@@ -90,12 +90,11 @@ public class RendererTest {
     @Test
     public void extractInsertsShouldExtractVariables() throws FileNotFoundException {
         Renderer renderer = new Renderer(RendererTest.class, "target/classes", "src/test/resources");
-        HashMap<String, String> vars = renderer.extractInserts(makeMap().put("AA", "").put("BB", "").build(),
-                "sdkjfhasdkfhjaksdjfh" +
-                "qweqwe<!--block:AA-->AaAa<!--endblock:AA-->fghfgh\n" +
-                "this bit goes nowhere\n" +
-                "werwer<!--block:BB-->BbBb<!--endblock:BB-->dfgdfg\n" +
-                "sdkjfhasdkfhjaksdjfh");
+        HashMap<String, String> vars = renderer.extractInserts("sdkjfhasdkfhjaksdjfh" +
+        "qweqwe<!--block:AA-->AaAa<!--endblock:AA-->fghfgh\n" +
+        "this bit goes nowhere\n" +
+        "werwer<!--block:BB-->BbBb<!--endblock:BB-->dfgdfg\n" +
+        "sdkjfhasdkfhjaksdjfh", "AA", "BB");
         assertEquals(2, vars.size());
         assertEquals("AaAa", vars.get("AA"));
         assertEquals("BbBb", vars.get("BB"));

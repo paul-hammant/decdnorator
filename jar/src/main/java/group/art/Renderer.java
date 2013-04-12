@@ -44,11 +44,15 @@ public class Renderer {
     }
 
     public String getPage(String file, String... insertionVars) throws FileNotFoundException {
+        return getPage(file, makeInsertions(insertionVars));
+    }
+
+    private Map<String, String> makeInsertions(String[] insertionVars) {
         Map<String, String> insertions = new HashMap<String, String>();
         for (String insertionVar : insertionVars) {
             insertions.put(insertionVar, "");
         }
-        return getPage(file, insertions);
+        return insertions;
     }
 
     public String getPage(String file, Map<String, String> insertions) throws FileNotFoundException {
@@ -59,7 +63,7 @@ public class Renderer {
         if (matcher.find()) {
             String decorator = matcher.group(1);
             decorator = overrides.override(decorator);
-            return new Renderer(clazz, from, to).getPage(decorator, extractInserts(insertions, content));
+            return new Renderer(clazz, from, to).getPage(decorator, extractInserts(content, insertions));
         }
         return content;
     }
@@ -84,7 +88,11 @@ public class Renderer {
         return content;
     }
 
-    public HashMap<String, String> extractInserts(Map<String, String> inserts, String content) {
+    public HashMap<String, String> extractInserts(String content, String... insertionVars) {
+        return extractInserts(content, makeInsertions(insertionVars));
+    }
+
+    public HashMap<String, String> extractInserts(String content, Map<String, String> inserts) {
         HashMap<String, String> newInserts = new HashMap<String, String>(inserts);
         for (Type type : types) {
             for (String from : inserts.keySet()) {
