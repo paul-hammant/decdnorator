@@ -2,7 +2,9 @@ package group.art;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -10,8 +12,8 @@ import java.util.regex.Pattern;
 
 public class Renderer {
 
+    private static final String DECORATE_WITH_REGEX = "<!--decorateWith:(.*\\w)-->";
     private final Class clazz;
-    private final DecoratorOverrides overrides;
     private String from;
     private String to;
 
@@ -22,10 +24,16 @@ public class Renderer {
             this.start = start;
             this.end = end;
         }
-        String startEsc;
-        String endEsc;
-        String start;
-        String end;
+        private String startEsc;
+        private String endEsc;
+        private String start;
+        private String end;
+        private String before(String from) {
+            return startEsc + "block:" + from + endEsc;
+        }
+        private String after(String from) {
+            return startEsc + "endblock:" + from + endEsc;
+        }
     }
 
     private Type[] types = new Type[] {
@@ -33,18 +41,14 @@ public class Renderer {
       new Type("\\/\\*", "\\*\\/", "/*", "*/") // JavaScript multi-line comments
     };
 
-    public Renderer(Class clazz, DecoratorOverrides overides, String from, String to) {
+    public Renderer(Class clazz, String from, String to) {
         this.clazz = clazz;
-        this.overrides = overides;
         this.from = from;
         this.to = to;
     }
-    public Renderer(Class clazz, String from, String to) {
-        this(clazz, DecoratorOverrides.NULL, from, to);
-    }
 
-    public String getPage(String file, String... insertionVars) throws FileNotFoundException {
-        return getPage(file, makeInsertions(insertionVars));
+    public String getPage(DecoratorOverrides overrides, String file, String... insertionVars) throws FileNotFoundException {
+        return getPage(overrides, new ArrayList<String>(), file, makeInsertions(insertionVars));
     }
 
     private Map<String, String> makeInsertions(String[] insertionVars) {
@@ -55,17 +59,33 @@ public class Renderer {
         return insertions;
     }
 
-    public String getPage(String file, Map<String, String> insertions) throws FileNotFoundException {
+    public String getPage(DecoratorOverrides overrides, String file, Map<String, String> insertions) throws FileNotFoundException {
+        return getPage(overrides, new ArrayList<String>(), file, insertions);
+    }
+
+    public String getPage(DecoratorOverrides overrides, List<String> previousDecorators, String file, Map<String, String> insertions) throws FileNotFoundException {
         String content = getRawContent(clazz, file);
         content = performInsertions(insertions, content);
-        Pattern decorateWith = Pattern.compile("<!--decorateWith:(.*\\w)-->");
+        Pattern decorateWith = Pattern.compile(DECORATE_WITH_REGEX);
         Matcher matcher = decorateWith.matcher(content);
+        previousDecorators.add(file);
         if (matcher.find()) {
-            String decorator = matcher.group(1);
-            decorator = overrides.override(decorator);
-            return new Renderer(clazz, from, to).getPage(decorator, extractInserts(content, insertions));
+            String decorator = overrides.override(matcher.group(1), previousDecorators);
+            if (!decorator.equals(DecoratorOverrides.NO_DECORATION)) {
+                HashMap<String, String> newInsertions = extractInserts(content, insertions);
+                return new Renderer(clazz, from, to).getPage(overrides, previousDecorators, decorator, newInsertions);
+            }
         }
-        return content;
+        return removeDecorationMarks(content);
+    }
+
+    private String removeDecorationMarks(String content) {
+        for (Type type : types) {
+            String before = type.before("(\\w*)");
+            content = content.replaceAll(before, "");
+            content = content.replaceAll(type.after("(\\w*)"), "");
+        }
+        return content.replaceAll(DECORATE_WITH_REGEX, "");
     }
 
     protected String getRawContent(Class clazz, String file) throws FileNotFoundException {
@@ -96,7 +116,7 @@ public class Renderer {
         HashMap<String, String> newInserts = new HashMap<String, String>(inserts);
         for (Type type : types) {
             for (String from : inserts.keySet()) {
-                String regex = type.startEsc + "block:" + from + type.endEsc + "(.*)" + type.startEsc + "endblock:" + from + type.endEsc;
+                String regex = type.before(from) + "(.*)" + type.after(from);
                 Matcher matcher2 = Pattern.compile(regex, Pattern.DOTALL).matcher(content);
                 if (matcher2.find()) {
                     String group = matcher2.group(1);
