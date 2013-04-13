@@ -12,12 +12,18 @@ import java.util.regex.Pattern;
 
 public class Renderer {
 
-    private static final String DECORATE_WITH_REGEX = "<!--decorateWith:(.*\\w)-->";
     private final Class clazz;
-    private String from;
-    private String to;
+    private final String from;
+    private final String to;
+    private final String charsetName;
 
-    private class Type {
+    private static final String DECORATE_WITH_REGEX = "<!--decorateWith:(.*\\w)-->";
+    private static final Type[] TYPES = new Type[] {
+            new Type("<!--", "-->", "<!--", "-->"),  // HTML comments
+            new Type("\\/\\*", "\\*\\/", "/*", "*/") // JavaScript multi-line comments
+    };
+
+    private static class Type {
         private Type(String startEsc, String endEsc, String start, String end) {
             this.startEsc = startEsc;
             this.endEsc = endEsc;
@@ -36,12 +42,12 @@ public class Renderer {
         }
     }
 
-    private Type[] types = new Type[] {
-      new Type("<!--", "-->", "<!--", "-->"),  // HTML comments
-      new Type("\\/\\*", "\\*\\/", "/*", "*/") // JavaScript multi-line comments
-    };
-
     public Renderer(Class clazz, String from, String to) {
+        this("UTF-8", clazz, from, to);
+    }
+
+    public Renderer(String charsetName, Class clazz, String from, String to) {
+        this.charsetName = charsetName;
         this.clazz = clazz;
         this.from = from;
         this.to = to;
@@ -73,16 +79,15 @@ public class Renderer {
             String decorator = overrides.override(matcher.group(1), previousDecorators);
             if (!decorator.equals(DecoratorOverrides.NO_DECORATION)) {
                 HashMap<String, String> newInsertions = extractInserts(content, insertions);
-                return new Renderer(clazz, from, to).getPage(overrides, previousDecorators, decorator, newInsertions);
+                return getPage(overrides, previousDecorators, decorator, newInsertions);
             }
         }
         return removeDecorationMarks(content);
     }
 
     private String removeDecorationMarks(String content) {
-        for (Type type : types) {
-            String before = type.before("(\\w*)");
-            content = content.replaceAll(before, "");
+        for (Type type : TYPES) {
+            content = content.replaceAll(type.before("(\\w*)"), "");
             content = content.replaceAll(type.after("(\\w*)"), "");
         }
         return content.replaceAll(DECORATE_WITH_REGEX, "");
@@ -91,7 +96,7 @@ public class Renderer {
     protected String getRawContent(Class clazz, String file) throws FileNotFoundException {
         String path = clazz.getProtectionDomain().getCodeSource().getLocation().getFile();
         path = path.replace(from, to);
-        return new Scanner(new File(path, file), "UTF-8").useDelimiter("\\A").next();
+        return new Scanner(new File(path, file), charsetName).useDelimiter("\\A").next();
     }
 
     private String performInsertions(Map<String, String> inserts, String content) {
@@ -102,7 +107,7 @@ public class Renderer {
     }
 
     private String performInsert(String content, String from, String to) {
-        for (Type type : types) {
+        for (Type type : TYPES) {
             content = content.replace(type.start + "insert:" + from + type.end, to);
         }
         return content;
@@ -114,7 +119,7 @@ public class Renderer {
 
     public HashMap<String, String> extractInserts(String content, Map<String, String> inserts) {
         HashMap<String, String> newInserts = new HashMap<String, String>(inserts);
-        for (Type type : types) {
+        for (Type type : TYPES) {
             for (String from : inserts.keySet()) {
                 String regex = type.before(from) + "(.*)" + type.after(from);
                 Matcher matcher2 = Pattern.compile(regex, Pattern.DOTALL).matcher(content);
