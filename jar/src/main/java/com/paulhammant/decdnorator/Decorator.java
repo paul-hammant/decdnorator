@@ -10,7 +10,7 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Renderer {
+public class Decorator {
 
     private final Class clazz;
     private final String from;
@@ -42,18 +42,18 @@ public class Renderer {
         }
     }
 
-    public Renderer(Class clazz, String from, String to) {
+    public Decorator(Class clazz, String from, String to) {
         this("UTF-8", clazz, from, to);
     }
 
-    public Renderer(String charsetName, Class clazz, String from, String to) {
+    public Decorator(String charsetName, Class clazz, String from, String to) {
         this.charsetName = charsetName;
         this.clazz = clazz;
         this.from = from;
         this.to = to;
     }
 
-    public String getPage(DecoratorOverrides overrides, String file, String... insertionVars) throws FileNotFoundException {
+    public String getPage(DecorationOverrides overrides, String file, String... insertionVars) throws FileNotFoundException {
         return getPage(overrides, new ArrayList<String>(), file, makeInsertions(insertionVars));
     }
 
@@ -65,11 +65,11 @@ public class Renderer {
         return insertions;
     }
 
-    public String getPage(DecoratorOverrides overrides, String file, Map<String, String> insertions) throws FileNotFoundException {
+    public String getPage(DecorationOverrides overrides, String file, Map<String, String> insertions) throws FileNotFoundException {
         return getPage(overrides, new ArrayList<String>(), file, insertions);
     }
 
-    public String getPage(DecoratorOverrides overrides, List<String> previousDecorators, String file, Map<String, String> insertions) throws FileNotFoundException {
+    public String getPage(DecorationOverrides overrides, List<String> previousDecorators, String file, Map<String, String> insertions) throws FileNotFoundException {
         String content = getRawContent(clazz, file);
         content = performInsertions(insertions, content);
         Pattern decorateWith = Pattern.compile(DECORATE_WITH_REGEX);
@@ -77,7 +77,7 @@ public class Renderer {
         previousDecorators.add(file);
         if (matcher.find()) {
             String decorator = overrides.override(matcher.group(1), previousDecorators);
-            if (!decorator.equals(DecoratorOverrides.NO_DECORATION)) {
+            if (!decorator.equals(DecorationOverrides.NO_DECORATION)) {
                 HashMap<String, String> newInsertions = extractInserts(content, insertions);
                 return getPage(overrides, previousDecorators, decorator, newInsertions);
             }

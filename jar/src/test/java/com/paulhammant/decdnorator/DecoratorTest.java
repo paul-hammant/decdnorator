@@ -10,14 +10,14 @@ import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
 
-public class RendererTest {
+public class DecoratorTest {
 
-    DecoratorOverrides overrides = DecoratorOverrides.NULL;
+    DecorationOverrides overrides = DecorationOverrides.NULL;
 
     @Test
     public void simpleHtmlStyleReplacementsShouldBeMade() throws FileNotFoundException {
-        Renderer renderer = new Renderer(RendererTest.class, "target/classes", "src/test/resources");
-        assertEquals("Mary Had A Little Lamb", renderer
+        Decorator decorator = new Decorator(DecoratorTest.class, "target/classes", "src/test/resources");
+        assertEquals("Mary Had A Little Lamb", decorator
                 .getPage(overrides, "has_replacements.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
     }
 
@@ -27,26 +27,26 @@ public class RendererTest {
 
     @Test
     public void simpleJavaScriptStyleReplacementsShouldBeMade() throws FileNotFoundException {
-        Renderer renderer = new Renderer(RendererTest.class, "target/classes", "src/test/resources");
-        assertEquals("Mary Had A Little Lamb", renderer.getPage(overrides, "has_replacements_js.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
+        Decorator decorator = new Decorator(DecoratorTest.class, "target/classes", "src/test/resources");
+        assertEquals("Mary Had A Little Lamb", decorator.getPage(overrides, "has_replacements_js.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
     }
 
     @Test
     public void secondDecoratorShouldBeProcessedForHtmlStyle() throws FileNotFoundException {
-        Renderer renderer = new Renderer(RendererTest.class, "target/classes", "src/test/resources");
-        assertEquals("Mary [Had] A [Little] Lamb", renderer.getPage(overrides, "has_replacements_and_second_decorator.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
+        Decorator decorator = new Decorator(DecoratorTest.class, "target/classes", "src/test/resources");
+        assertEquals("Mary [Had] A [Little] Lamb", decorator.getPage(overrides, "has_replacements_and_second_decorator.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
     }
 
     @Test
     public void secondDecoratorShouldBeProcessedForJavaScriptStyle() throws FileNotFoundException {
-        Renderer renderer = new Renderer(RendererTest.class, "target/classes", "src/test/resources");
-        assertEquals("Mary [Had] A [Little] Lamb", renderer.getPage(overrides, "has_replacements_and_second_decorator_js.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
+        Decorator decorator = new Decorator(DecoratorTest.class, "target/classes", "src/test/resources");
+        assertEquals("Mary [Had] A [Little] Lamb", decorator.getPage(overrides, "has_replacements_and_second_decorator_js.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
     }
 
     @Test
     public void decoratesAngularPageWithTwoControllersIntoOne() throws FileNotFoundException {
-        Renderer renderer = new Renderer(RendererTest.class, "target/classes", "src/test/resources");
-        String page = renderer.getPage(overrides, "has_two_angular_controllers.html", "Greet", "GreetJs", "List", "ListJs");
+        Decorator decorator = new Decorator(DecoratorTest.class, "target/classes", "src/test/resources");
+        String page = decorator.getPage(overrides, "has_two_angular_controllers.html", "Greet", "GreetJs", "List", "ListJs");
         assertEquals("<!doctype html>\n" +
                 "<html ng-app>\n" +
                 "  <head>\n" +
@@ -81,43 +81,43 @@ public class RendererTest {
 
     @Test
     public void secondDecoratorShouldBeOverridable() throws FileNotFoundException {
-        DecoratorOverrides o = new DecoratorOverrides() {
+        DecorationOverrides o = new DecorationOverrides() {
             public String override(String decorator, List<String> done) {
                 return decorator.replace("has_replacements.txt", "banana.txt" );
             }
         };
 
-        Renderer renderer = new Renderer(RendererTest.class, "target/classes", "src/test/resources");
+        Decorator decorator = new Decorator(DecoratorTest.class, "target/classes", "src/test/resources");
         assertEquals(
                 "a\n" +
                 "<[Had]>\n" +
                 "b\n" +
                 "<[Little]>\n" +
                 "c",
-                renderer.getPage(o, "has_replacements_and_second_decorator.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
+                decorator.getPage(o, "has_replacements_and_second_decorator.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
     }
 
     @Test
     public void secondDecoratorShouldBeSkippable() throws FileNotFoundException {
-        DecoratorOverrides o = new DecoratorOverrides() {
+        DecorationOverrides o = new DecorationOverrides() {
             public String override(String decorator, List<String> done) {
-                return decorator.replace("has_replacements.txt", DecoratorOverrides.NO_DECORATION );
+                return decorator.replace("has_replacements.txt", DecorationOverrides.NO_DECORATION );
             }
         };
 
-        Renderer renderer = new Renderer(RendererTest.class, "target/classes", "src/test/resources");
+        Decorator decorator = new Decorator(DecoratorTest.class, "target/classes", "src/test/resources");
         assertEquals(
                 "\n" + // decorate-with was here
                 "[Had]\n" +
                 "this bit goes nowhere\n" +
                 "[Little]",
-                renderer.getPage(o, "has_replacements_and_second_decorator.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
+                decorator.getPage(o, "has_replacements_and_second_decorator.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
     }
 
     @Test
     public void extractInsertsShouldExtractVariables() throws FileNotFoundException {
-        Renderer renderer = new Renderer(RendererTest.class, "target/classes", "src/test/resources");
-        HashMap<String, String> vars = renderer.extractInserts("sdkjfhasdkfhjaksdjfh" +
+        Decorator decorator = new Decorator(DecoratorTest.class, "target/classes", "src/test/resources");
+        HashMap<String, String> vars = decorator.extractInserts("sdkjfhasdkfhjaksdjfh" +
                 "qweqwe<!--block:AA-->AaAa<!--endblock:AA-->fghfgh\n" +
                 "this bit goes nowhere\n" +
                 "werwer<!--block:BB-->BbBb<!--endblock:BB-->dfgdfg\n" +

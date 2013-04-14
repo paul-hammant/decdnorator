@@ -1,7 +1,7 @@
 package com.paulhammant.decdnorator.example;
 
-import com.paulhammant.decdnorator.DecoratorOverrides;
-import com.paulhammant.decdnorator.Renderer;
+import com.paulhammant.decdnorator.DecorationOverrides;
+import com.paulhammant.decdnorator.Decorator;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -17,7 +17,7 @@ public class ExampleFilter implements Filter {
 
 
 
-    private Renderer renderer = new Renderer(ExampleFilter.class, "/classes/", "/");
+    private Decorator decorator = new Decorator(ExampleFilter.class, "/classes/", "/");
 
     public void init(FilterConfig filterConfig) throws ServletException {
     }
@@ -31,7 +31,7 @@ public class ExampleFilter implements Filter {
 
         final boolean noSecondaryDecoration = request.getParameter("noSecondaryDecoration") != null;
 
-        DecoratorOverrides foo = new DecoratorOverrides() {
+        DecorationOverrides foo = new DecorationOverrides() {
             public String override(String decorator, List<String> previouslyDone) {
                 if (noSecondaryDecoration == true && previouslyDone.size() > 0) {
                     return NO_DECORATION;
@@ -43,7 +43,7 @@ public class ExampleFilter implements Filter {
         // you determine that you should do the cacheable page somehow,
         // rather than fall through to other request mappings.
         if (pageName.startsWith("has_two_angular_controllers.html")) {
-            String page = renderer.getPage(foo, pageName, "Greet", "GreetJs", "List", "ListJs");
+            String page = decorator.getPage(foo, pageName, "Greet", "GreetJs", "List", "ListJs");
             response.setContentType("text/html");
 
             response.getWriter().write(page);
