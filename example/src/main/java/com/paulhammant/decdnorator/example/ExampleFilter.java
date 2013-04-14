@@ -1,7 +1,7 @@
-package group.art.example;
+package com.paulhammant.decdnorator.example;
 
-import group.art.DecoratorOverrides;
-import group.art.Renderer;
+import com.paulhammant.decdnorator.DecoratorOverrides;
+import com.paulhammant.decdnorator.Renderer;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;

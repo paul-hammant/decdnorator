@@ -1,4 +1,4 @@
-package group.art;
+package com.paulhammant.decdnorator;
 
 import java.io.File;
 import java.io.FileNotFoundException;

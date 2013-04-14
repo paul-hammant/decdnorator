@@ -1,4 +1,4 @@
-package group.art;
+package com.paulhammant.decdnorator;
 
 
 import com.google.common.collect.ImmutableMap;

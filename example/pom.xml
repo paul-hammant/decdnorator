@@ -2,10 +2,10 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>group</groupId>
-  <artifactId>art-example</artifactId>
+  <artifactId>decdnorator-example</artifactId>
   <packaging>war</packaging>
   <version>1.0-SNAPSHOT</version>
-  <name>art example</name>
+  <name>decdnorator example webapp</name>
   <url>http://maven.apache.org</url>
   <dependencies>
     <dependency>
@@ -21,8 +21,8 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>group</groupId>
-      <artifactId>art</artifactId>
+      <groupId>com.paulhammant</groupId>
+      <artifactId>decdnorator</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
@@ -41,7 +41,7 @@
             </goals>
             <configuration>
               <source>
-                ant.copy(todir: project.build.directory + "/art-example-1.0-SNAPSHOT/WEB-INF" ) {
+                ant.copy(todir: project.build.directory + "/decdnorator-example-1.0-SNAPSHOT/WEB-INF" ) {
                   fileset(dir: project.build.directory + "/../../jar/src/test/resources") {
                     include(name: '*.html')
                   }
