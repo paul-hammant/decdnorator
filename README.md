@@ -1,3 +1,5 @@
+![logo](http://paulhammant.com/images/decdnorator.png)
+
 # Overview
 
 Decdnorator is a Java servlet filter that does page decoration for files that are suitable for placing in a CDN.  It tokenizes full HTML pages using block markers (like Python's [Flask](http://flask.pocoo.org/docs/patterns/templateinheritance/)) instead of page parsing (like [Sitemesh](sitemesh.org)).  Multiple stages of decoration are possible, as is a rudimentary include mechanism.  Multiple blocks are extractable (say, main-content, title, javascript) and insertable.  The block markers are HTML/JavaScript friendly though, so pages could be loaded into a browser raw, and still function.
