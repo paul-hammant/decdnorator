@@ -9,6 +9,7 @@
   <artifactId>decdnorator</artifactId>
   <packaging>jar</packaging>
   <name>decdnorator</name>
+  <description>Decoration of CDM deployable pages - core jar</description>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>

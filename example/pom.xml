@@ -9,6 +9,7 @@
   <artifactId>decdnorator-example</artifactId>
   <packaging>war</packaging>
   <name>decdnorator example webapp</name>
+  <description>Decoration of CDM deployable pages - example app</description>  
   <url>http://maven.apache.org</url>
   <dependencies>
     <dependency>
