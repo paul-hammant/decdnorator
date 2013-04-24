@@ -14,9 +14,11 @@ public class DecoratorTest {
 
     DecorationOverrides overrides = DecorationOverrides.NULL;
 
+    PathFinder pathFinder = new PathFinder.FromClass(DecoratorTest.class);
+
     @Test
     public void simpleHtmlStyleReplacementsShouldBeMade() throws FileNotFoundException {
-        Decorator decorator = new Decorator(DecoratorTest.class, "target/classes", "src/test/resources");
+        Decorator decorator = new Decorator(pathFinder, "target/classes", "src/test/resources");
         assertEquals("Mary Had A Little Lamb", decorator
                 .getPage(overrides, "has_replacements.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
     }
@@ -27,25 +29,25 @@ public class DecoratorTest {
 
     @Test
     public void simpleJavaScriptStyleReplacementsShouldBeMade() throws FileNotFoundException {
-        Decorator decorator = new Decorator(DecoratorTest.class, "target/classes", "src/test/resources");
+        Decorator decorator = new Decorator(pathFinder, "target/classes", "src/test/resources");
         assertEquals("Mary Had A Little Lamb", decorator.getPage(overrides, "has_replacements_js.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
     }
 
     @Test
     public void secondDecoratorShouldBeProcessedForHtmlStyle() throws FileNotFoundException {
-        Decorator decorator = new Decorator(DecoratorTest.class, "target/classes", "src/test/resources");
+        Decorator decorator = new Decorator(pathFinder, "target/classes", "src/test/resources");
         assertEquals("Mary [Had] A [Little] Lamb", decorator.getPage(overrides, "has_replacements_and_second_decorator.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
     }
 
     @Test
     public void secondDecoratorShouldBeProcessedForJavaScriptStyle() throws FileNotFoundException {
-        Decorator decorator = new Decorator(DecoratorTest.class, "target/classes", "src/test/resources");
+        Decorator decorator = new Decorator(pathFinder, "target/classes", "src/test/resources");
         assertEquals("Mary [Had] A [Little] Lamb", decorator.getPage(overrides, "has_replacements_and_second_decorator_js.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
     }
 
     @Test
     public void decoratesAngularPageWithTwoControllersIntoOne() throws FileNotFoundException {
-        Decorator decorator = new Decorator(DecoratorTest.class, "target/classes", "src/test/resources");
+        Decorator decorator = new Decorator(pathFinder, "target/classes", "src/test/resources");
         String page = decorator.getPage(overrides, "has_two_angular_controllers.html", "Greet", "GreetJs", "List", "ListJs");
         assertEquals("<!doctype html>\n" +
                 "<html ng-app>\n" +
@@ -87,7 +89,7 @@ public class DecoratorTest {
             }
         };
 
-        Decorator decorator = new Decorator(DecoratorTest.class, "target/classes", "src/test/resources");
+        Decorator decorator = new Decorator(pathFinder, "target/classes", "src/test/resources");
         assertEquals(
                 "a\n" +
                 "<[Had]>\n" +
@@ -105,7 +107,7 @@ public class DecoratorTest {
             }
         };
 
-        Decorator decorator = new Decorator(DecoratorTest.class, "target/classes", "src/test/resources");
+        Decorator decorator = new Decorator(pathFinder, "target/classes", "src/test/resources");
         assertEquals(
                 "\n" + // decorate-with was here
                 "[Had]\n" +
@@ -116,7 +118,7 @@ public class DecoratorTest {
 
     @Test
     public void extractInsertsShouldExtractVariables() throws FileNotFoundException {
-        Decorator decorator = new Decorator(DecoratorTest.class, "target/classes", "src/test/resources");
+        Decorator decorator = new Decorator(pathFinder, "target/classes", "src/test/resources");
         HashMap<String, String> vars = decorator.extractInserts("sdkjfhasdkfhjaksdjfh" +
                 "qweqwe<!--block:AA-->AaAa<!--endblock:AA-->fghfgh\n" +
                 "this bit goes nowhere\n" +

@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 
 public class Decorator {
 
-    private final Class clazz;
+    private final PathFinder pathFinder;
     private final String from;
     private final String to;
     private final String charsetName;
@@ -42,13 +42,13 @@ public class Decorator {
         }
     }
 
-    public Decorator(Class clazz, String from, String to) {
-        this("UTF-8", clazz, from, to);
+    public Decorator(PathFinder pathFinder, String from, String to) {
+        this("UTF-8", pathFinder, from, to);
     }
 
-    public Decorator(String charsetName, Class clazz, String from, String to) {
+    public Decorator(String charsetName, PathFinder pathFinder, String from, String to) {
         this.charsetName = charsetName;
-        this.clazz = clazz;
+        this.pathFinder = pathFinder;
         this.from = from;
         this.to = to;
     }
@@ -70,7 +70,7 @@ public class Decorator {
     }
 
     public String getPage(DecorationOverrides overrides, List<String> previousDecorators, String file, Map<String, String> insertions) throws FileNotFoundException {
-        String content = getRawContent(clazz, file);
+        String content = getRawContent(pathFinder, file);
         content = performInsertions(insertions, content);
         Pattern decorateWith = Pattern.compile(DECORATE_WITH_REGEX);
         Matcher matcher = decorateWith.matcher(content);
@@ -93,8 +93,8 @@ public class Decorator {
         return content.replaceAll(DECORATE_WITH_REGEX, "");
     }
 
-    protected String getRawContent(Class clazz, String file) throws FileNotFoundException {
-        String path = clazz.getProtectionDomain().getCodeSource().getLocation().getFile();
+    protected String getRawContent(PathFinder pathFinder, String file) throws FileNotFoundException {
+        String path = pathFinder.getBasePath();
         path = path.replace(from, to);
         return new Scanner(new File(path, file), charsetName).useDelimiter("\\A").next();
     }

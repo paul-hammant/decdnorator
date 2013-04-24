@@ -2,6 +2,7 @@ package com.paulhammant.decdnorator.example;
 
 import com.paulhammant.decdnorator.DecorationOverrides;
 import com.paulhammant.decdnorator.Decorator;
+import com.paulhammant.decdnorator.PathFinder;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -15,9 +16,7 @@ import java.util.List;
 
 public class ExampleFilter implements Filter {
 
-
-
-    private Decorator decorator = new Decorator(ExampleFilter.class, "/classes/", "/");
+    private Decorator decorator = new Decorator(new PathFinder.FromClass(ExampleFilter.class), "/classes/", "/");
 
     public void init(FilterConfig filterConfig) throws ServletException {
     }
