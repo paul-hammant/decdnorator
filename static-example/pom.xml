@@ -1,0 +1,89 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+	  <groupId>com.paulhammant</groupId>
+	  <artifactId>decdnorator-parent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>decdnorator-static-example</artifactId>
+  <packaging>war</packaging>
+  <name>decdnorator static webapp example</name>
+  <description>decdnorator example in static configuration as part of a build process</description>
+  <url>https://github.com/paul-hammant/decdnorator</url>
+  <dependencies>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>14.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.5</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.groovy.maven</groupId>
+        <artifactId>gmaven-plugin</artifactId>
+        <version>1.0</version>
+        <executions>
+          <!-- This is the crucial fragment... -->
+          <execution>
+            <id>decdnorator static content generation</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>execute</goal>
+            </goals>
+            <configuration>
+              <source>
+                <![CDATA[
+                import com.paulhammant.decdnorator.*
+
+                def warDirectory = project.build.directory + "/" + project.build.finalName
+                new File(warDirectory).mkdirs()
+
+                // we're borrow decorators used in the tests for the 'jar'. In reality your
+                // html would be co-located with your HTML/CSS/JS source
+                PathFinder pathFinder = PathFinder.fromFile(project.basedir)
+                        .replace("static-example", "jar/src/test/resources")
+
+                def decorator = new Decorator(pathFinder)
+
+                // Generate a "Brand One" page
+                new File(warDirectory, "brand_one.html") << decorator.getPage(DecorationOverrides.NO_OVERRIDES,
+                        "has_two_angular_controllers.html", "Greet", "GreetJs", "List", "ListJs")
+
+                // Generate a "Brand One" page without secondary decoration
+                DecorationOverrides overrides = new DecorationOverrides.LimitRecursion(1)
+
+                new File(warDirectory, "brand_one_reduced.html") << decorator.getPage(overrides,
+                        "has_two_angular_controllers.html", "Greet", "GreetJs", "List", "ListJs")
+
+                // generate a "Brand Two" page
+                overrides = new DecorationOverrides.Single("adds_a_header", "adds_a_different_header")
+
+                new File(warDirectory, "brand_two.html") << decorator.getPage(overrides,
+                        "has_two_angular_controllers.html", "Greet", "GreetJs", "List", "ListJs")
+
+                ]]>
+              </source>
+            </configuration>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>com.paulhammant</groupId>
+            <artifactId>decdnorator</artifactId>
+            <version>${project.version}</version> <!-- or a fixed version -->
+            <scope>runtime</scope>
+          </dependency>
+        </dependencies>
+      </plugin>
+    </plugins>
+  </build>
+</project>

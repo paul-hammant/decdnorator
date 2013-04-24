@@ -13,8 +13,8 @@ import java.util.regex.Pattern;
 public class Decorator {
 
     private final PathFinder pathFinder;
-    private final String from;
-    private final String to;
+    //private final String from;
+    //private final String to;
     private final String charsetName;
 
     private static final String DECORATE_WITH_REGEX = "<!--decorateWith:(.*\\w)-->";
@@ -42,15 +42,13 @@ public class Decorator {
         }
     }
 
-    public Decorator(PathFinder pathFinder, String from, String to) {
-        this("UTF-8", pathFinder, from, to);
+    public Decorator(PathFinder pathFinder) {
+        this("UTF-8", pathFinder);
     }
 
-    public Decorator(String charsetName, PathFinder pathFinder, String from, String to) {
+    public Decorator(String charsetName, PathFinder pathFinder) {
         this.charsetName = charsetName;
         this.pathFinder = pathFinder;
-        this.from = from;
-        this.to = to;
     }
 
     public String getPage(DecorationOverrides overrides, String file, String... insertionVars) throws FileNotFoundException {
@@ -72,20 +70,23 @@ public class Decorator {
     public String getPage(DecorationOverrides overrides, List<String> previousDecorators, String file, Map<String, String> insertions) throws FileNotFoundException {
         String content = getRawContent(pathFinder, file);
         content = performInsertions(insertions, content);
-        Pattern decorateWith = Pattern.compile(DECORATE_WITH_REGEX);
-        Matcher matcher = decorateWith.matcher(content);
+        Pattern decorateWithPattern = Pattern.compile(DECORATE_WITH_REGEX);
+        Matcher matcher = decorateWithPattern.matcher(content);
         previousDecorators.add(file);
+        String decorateWith = DecorationOverrides.NO_DECORATOR_SPECIFIED;
         if (matcher.find()) {
-            String decorator = overrides.override(matcher.group(1), previousDecorators);
-            if (!decorator.equals(DecorationOverrides.NO_DECORATION)) {
-                HashMap<String, String> newInsertions = extractInserts(content, insertions);
-                return getPage(overrides, previousDecorators, decorator, newInsertions);
-            }
+            decorateWith = matcher.group(1);
         }
-        return removeDecorationMarks(content);
+        String decorator = overrides.override(decorateWith, previousDecorators);
+        if (!decorator.equals(DecorationOverrides.NO_MORE_DECORATION)) {
+            HashMap<String, String> newInsertions = extractInserts(content, insertions);
+            return getPage(overrides, previousDecorators, decorator, newInsertions);
+        } else {
+            return removeDecdnoratorMarks(content);
+        }
     }
 
-    private String removeDecorationMarks(String content) {
+    private String removeDecdnoratorMarks(String content) {
         for (Type type : TYPES) {
             content = content.replaceAll(type.before("(\\w*)"), "");
             content = content.replaceAll(type.after("(\\w*)"), "");
@@ -95,7 +96,6 @@ public class Decorator {
 
     protected String getRawContent(PathFinder pathFinder, String file) throws FileNotFoundException {
         String path = pathFinder.getBasePath();
-        path = path.replace(from, to);
         return new Scanner(new File(path, file), charsetName).useDelimiter("\\A").next();
     }
 

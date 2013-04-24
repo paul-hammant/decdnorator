@@ -11,12 +11,13 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
 public class ExampleFilter implements Filter {
 
-    private Decorator decorator = new Decorator(new PathFinder.FromClass(ExampleFilter.class), "/classes/", "/");
+    private Decorator decorator = new Decorator(PathFinder.fromClass(ExampleFilter.class).replace("/classes/", "/"));
 
     public void init(FilterConfig filterConfig) throws ServletException {
     }
@@ -33,7 +34,7 @@ public class ExampleFilter implements Filter {
         DecorationOverrides foo = new DecorationOverrides() {
             public String override(String decorator, List<String> previouslyDone) {
                 if (noSecondaryDecoration == true && previouslyDone.size() > 0) {
-                    return NO_DECORATION;
+                    return NO_MORE_DECORATION;
                 }
                 return decorator;
             }
@@ -44,7 +45,7 @@ public class ExampleFilter implements Filter {
         if (pageName.startsWith("has_two_angular_controllers.html")) {
             String page = decorator.getPage(foo, pageName, "Greet", "GreetJs", "List", "ListJs");
             response.setContentType("text/html");
-
+            ((HttpServletResponse) response).setHeader("TIMEOUT", "TODO");
             response.getWriter().write(page);
         } else {
             chain.doFilter(request, response);

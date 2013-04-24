@@ -6,11 +6,11 @@
 	  <artifactId>decdnorator-parent</artifactId>
       <version>1.0-SNAPSHOT</version>
   </parent>
-  <artifactId>decdnorator-example</artifactId>
+  <artifactId>decdnorator-dynamic-example</artifactId>
   <packaging>war</packaging>
-  <name>decdnorator example webapp</name>
-  <description>Decoration of CDM deployable pages - example app</description>  
-  <url>http://maven.apache.org</url>
+  <name>decdnorator dynamic webapp example</name>
+  <description>decdnorator example in dynamic (servlet filter) configuration, to be used in conjunction with other server-side web-frameworks</description>
+  <url>https://github.com/paul-hammant/decdnorator</url>
   <dependencies>
     <dependency>
       <groupId>com.google.guava</groupId>
@@ -22,7 +22,7 @@
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
       <version>2.5</version>
-      <scope>compile</scope>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.paulhammant</groupId>
