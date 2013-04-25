@@ -1,0 +1,30 @@
+<!doctype html>
+<html ng-app>
+  <head>
+      <script src="http://code.angularjs.org/1.0.5/angular.min.js"></script>
+      <style>
+          .ng-scope  {
+              border: 1px dashed blue;
+              margin: 3px;
+          }
+      </style>
+
+    <script>
+      function UnifiedCtrl($scope) {
+        $scope.name = 'World';
+        $scope.names = ['Igor', 'Misko', 'Vojta'];
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Example.com - The worlds best Example website</h1>
+    <div ng-controller="UnifiedCtrl">
+      <ol>
+        <li ng-repeat="name in names">{{name}}</li>
+      </ol>
+<!-- yes, we're reordering -->
+      Hello {{name}}!
+    </div>
+    <h1>Contact us as /dev/null</h1>
+  </body>
+</html>

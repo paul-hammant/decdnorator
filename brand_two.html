@@ -1,0 +1,27 @@
+<!doctype html>
+<html ng-app>
+  <head>
+      <script src="http://code.angularjs.org/1.0.5/angular.min.js"></script>
+    <script>
+      function UnifiedCtrl($scope) {
+        $scope.name = 'World';
+        $scope.names = ['Igor', 'Misko', 'Vojta'];
+      }
+    </script>
+  </head>
+  <body>
+    <hr/>
+    <img src="http://paulhammant.com/images/exampleDotCom.png"/>
+      <p>(more header goes here)</p>
+    <hr/>
+    <div ng-controller="UnifiedCtrl">
+      <ol>
+        <li ng-repeat="name in names">{{name}}</li>
+      </ol>
+      Hello {{name}}!
+    </div>
+    <hr/>
+      <p>(footer goes here)</p>
+    <hr/>
+  </body>
+</html>

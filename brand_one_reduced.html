@@ -1,0 +1,42 @@
+<!doctype html>
+
+<html ng-app>
+  <head>
+    <script src="http://code.angularjs.org/1.0.5/angular.min.js"></script>
+    <style>
+        .ng-scope  {
+            border: 1px solid red;
+            margin: 3px;
+        }
+    </style>
+    <script>
+      function GreetCtrl($scope) {
+        
+        $scope.name = 'World';
+        
+      }
+
+      function ListCtrl($scope) {
+        
+        $scope.names = ['Igor', 'Misko', 'Vojta'];
+        
+      }
+    </script>
+  </head>
+  <body>
+    <span>Simple controller that shows a single model item (a name)</span>
+    <div ng-controller="GreetCtrl">
+      
+      Hello {{name}}!
+      
+    </div>
+    <span>Controller that shows a list of names</span>
+    <div ng-controller="ListCtrl">
+      
+      <ol>
+        <li ng-repeat="name in names">{{name}}</li>
+      </ol>
+      
+    </div>
+  </body>
+</html>
