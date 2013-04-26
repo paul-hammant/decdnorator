@@ -26,7 +26,14 @@
   </scm>
   <modules>
     <module>jar</module>
-    <module>static-example</module>
-    <module>dynamic-example</module>
   </modules>
+  <profiles>
+    <profile>
+      <id>examples</id>
+      <modules>
+        <module>static-example</module>
+        <module>dynamic-example</module>
+      </modules>
+    </profile>
+  </profiles>
 </project>
