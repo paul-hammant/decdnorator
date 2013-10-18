@@ -4,11 +4,19 @@ import java.io.File;
 
 public abstract class PathFinder {
 
+    protected String additonalPath = "";
+
     public abstract String getBasePath();
 
     public static FromFile fromFile(File path) {
         return new FromFile(path);
     }
+
+    public PathFinder add(String additonalPath) {
+        this.additonalPath = additonalPath;
+        return this;
+    }
+
 
     public static class FromFile extends PathFinder {
         private File path;
@@ -19,7 +27,7 @@ public abstract class PathFinder {
             this.path = path;
         }
         public String getBasePath() {
-            return path.getAbsolutePath().replace(from, to);
+            return path.getAbsolutePath().replace(from, to) + additonalPath;
         }
         PathFinder replace(String from, String to) {
             this.from = from;

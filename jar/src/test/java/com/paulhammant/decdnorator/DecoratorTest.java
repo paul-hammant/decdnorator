@@ -1,12 +1,12 @@
 package com.paulhammant.decdnorator;
 
 
-import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 
 import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.paulhammant.decdnorator.DecorationOverrides.NO_DECORATOR_SPECIFIED;
@@ -24,8 +24,12 @@ public class DecoratorTest {
     @Test
     public void simpleHtmlStyleReplacementsShouldBeMade() throws FileNotFoundException {
         Decorator decorator = new Decorator(pathFinder);
+        Map<String, String> map = makeMap();
+        map.put("AA", "Had");
+        map.put("BB", "Little");
+        map.put("AA", "Had");
         assertEquals("Mary Had A Little Lamb", decorator
-                .getPage(NO_OVERRIDES, "has_replacements.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
+                .getPage(NO_OVERRIDES, "has_replacements.txt", map));
     }
 
     @Test
@@ -37,33 +41,54 @@ public class DecoratorTest {
                 eq(newArrayList("has_replacements.txt"))))
                 .thenReturn("this_file_does_not_exist");
         try {
-            decorator.getPage(decOvr, "has_replacements.txt", makeMap().put("AA", "Had").put("BB", "Little").build());
+            Map<String, String> map = makeMap();
+            map.put("AA", "Had");
+            map.put("BB", "Little");
+            decorator.getPage(decOvr, "has_replacements.txt", map);
             fail("should have barfed");
         } catch (FileNotFoundException e) {
             // expected
         }
     }
 
-    private ImmutableMap.Builder<String, String> makeMap() {
-        return new ImmutableMap.Builder<String, String>();
+    private Map<String, String> makeMap() {
+        return new HashMap<String, String>();
     }
 
     @Test
     public void simpleJavaScriptStyleReplacementsShouldBeMade() throws FileNotFoundException {
         Decorator decorator = new Decorator(pathFinder);
-        assertEquals("Mary Had A Little Lamb", decorator.getPage(NO_OVERRIDES, "has_replacements_js.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
+        Map <String, String> map = makeMap();
+        map.put("AA", "Had");
+        map.put("BB", "Little");
+        assertEquals("Mary Had A Little Lamb", decorator.getPage(NO_OVERRIDES, "has_replacements_js.txt", map));
     }
 
     @Test
     public void secondDecoratorShouldBeProcessedForHtmlStyle() throws FileNotFoundException {
         Decorator decorator = new Decorator(pathFinder);
-        assertEquals("Mary [Had] A [Little] Lamb", decorator.getPage(NO_OVERRIDES, "has_replacements_and_second_decorator.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
+        Map <String, String> map = makeMap();
+        map.put("AA", "Had");
+        map.put("BB", "Little");
+        assertEquals("Mary [Had] A [Little] Lamb", decorator.getPage(NO_OVERRIDES, "has_replacements_and_second_decorator.txt", map));
     }
 
     @Test
     public void secondDecoratorShouldBeProcessedForJavaScriptStyle() throws FileNotFoundException {
         Decorator decorator = new Decorator(pathFinder);
-        assertEquals("Mary [Had] A [Little] Lamb", decorator.getPage(NO_OVERRIDES, "has_replacements_and_second_decorator_js.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
+        Map <String, String> map = makeMap();
+        map.put("AA", "Had");
+        map.put("BB", "Little");
+        assertEquals("Mary [Had] A [Little] Lamb", decorator.getPage(NO_OVERRIDES, "has_replacements_and_second_decorator_js.txt", map));
+    }
+
+    @Test
+    public void decoratesAngularPageWithTwoControllersIntoOne1000() throws FileNotFoundException {
+        long start =  System.currentTimeMillis();
+        for (int i = 0; i < 1000; i++) {
+            decoratesAngularPageWithTwoControllersIntoOne();
+        }
+        System.out.println("elapsed:" + (System.currentTimeMillis() - start));
     }
 
     @Test
@@ -107,13 +132,16 @@ public class DecoratorTest {
         DecorationOverrides overrides = new DecorationOverrides.Single("has_replacements.txt", "banana.txt" );
 
         Decorator decorator = new Decorator(pathFinder);
+        Map <String, String> map = makeMap();
+        map.put("AA", "Had");
+        map.put("BB", "Little");
         assertEquals(
                 "a\n" +
                 "<[Had]>\n" +
                 "b\n" +
                 "<[Little]>\n" +
                 "c",
-                decorator.getPage(overrides, "has_replacements_and_second_decorator.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
+                decorator.getPage(overrides, "has_replacements_and_second_decorator.txt", map));
     }
 
     @Test
@@ -125,18 +153,22 @@ public class DecoratorTest {
         };
 
         Decorator decorator = new Decorator(pathFinder);
+        Map <String, String> map = makeMap();
+        map.put("AA", "Had");
+        map.put("BB", "Little");
+
         assertEquals(
                 "\n" + // decorate-with was here
                 "[Had]\n" +
                 "this bit goes nowhere\n" +
                 "[Little]",
-                decorator.getPage(o, "has_replacements_and_second_decorator.txt", makeMap().put("AA", "Had").put("BB", "Little").build()));
+                decorator.getPage(o, "has_replacements_and_second_decorator.txt", map));
     }
 
     @Test
     public void extractInsertsShouldExtractVariables() throws FileNotFoundException {
         Decorator decorator = new Decorator(pathFinder);
-        HashMap<String, String> vars = decorator.extractInserts("sdkjfhasdkfhjaksdjfh" +
+        Map<String, String> vars = decorator.extractInserts("sdkjfhasdkfhjaksdjfh" +
                 "qweqwe<!--block:AA-->AaAa<!--endblock:AA-->fghfgh\n" +
                 "this bit goes nowhere\n" +
                 "werwer<!--block:BB-->BbBb<!--endblock:BB-->dfgdfg\n" +

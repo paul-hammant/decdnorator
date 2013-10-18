@@ -12,9 +12,8 @@ import java.util.regex.Pattern;
 
 public class Decorator {
 
-    private final PathFinder pathFinder;
-    //private final String from;
-    //private final String to;
+    //private final PathFinder pathFinder;
+    private String basePath;
     private final String charsetName;
 
     private static final String DECORATE_WITH_REGEX = "<!--decorateWith:(.*\\w)-->";
@@ -46,21 +45,33 @@ public class Decorator {
         this("UTF-8", pathFinder);
     }
 
+    public Decorator(String basePath) {
+        this("UTF-8", basePath);
+    }
+
     public Decorator(String charsetName, PathFinder pathFinder) {
         this.charsetName = charsetName;
-        this.pathFinder = pathFinder;
+        basePath = pathFinder.getBasePath();
+    }
+
+    public Decorator(String charsetName, String basePath) {
+        this.charsetName = charsetName;
+        this.basePath = basePath;
     }
 
     public String getPage(DecorationOverrides overrides, String file, String... insertionVars) throws FileNotFoundException {
-        return getPage(overrides, new ArrayList<String>(), file, makeInsertions(insertionVars));
+        return getPage(overrides, new ArrayList<String>(), file, makeInsertionKeys(insertionVars, new HashMap<String, String>()));
     }
 
-    private Map<String, String> makeInsertions(String[] insertionVars) {
-        Map<String, String> insertions = new HashMap<String, String>();
+    private Map<String, String> makeInsertionKeys(String[] insertionVars, Map<String, String> insertions) {
         for (String insertionVar : insertionVars) {
             insertions.put(insertionVar, "");
         }
         return insertions;
+    }
+
+    public String getPage(String file, Map<String, String> insertions) throws FileNotFoundException {
+        return getPage(DecorationOverrides.NO_OVERRIDES, new ArrayList<String>(), file, insertions);
     }
 
     public String getPage(DecorationOverrides overrides, String file, Map<String, String> insertions) throws FileNotFoundException {
@@ -68,8 +79,7 @@ public class Decorator {
     }
 
     public String getPage(DecorationOverrides overrides, List<String> previousDecorators, String file, Map<String, String> insertions) throws FileNotFoundException {
-        String content = getRawContent(pathFinder, file);
-        content = performInsertions(insertions, content);
+        String content = getPageAndPerformInsertions(file, insertions);
         Pattern decorateWithPattern = Pattern.compile(DECORATE_WITH_REGEX);
         Matcher matcher = decorateWithPattern.matcher(content);
         previousDecorators.add(file);
@@ -79,11 +89,15 @@ public class Decorator {
         }
         String decorator = overrides.override(decorateWith, previousDecorators);
         if (!decorator.equals(DecorationOverrides.NO_MORE_DECORATION)) {
-            HashMap<String, String> newInsertions = extractInserts(content, insertions);
+            Map<String, String> newInsertions = extractInserts(content, insertions);
             return getPage(overrides, previousDecorators, decorator, newInsertions);
         } else {
             return removeDecdnoratorMarks(content);
         }
+    }
+
+    public String getPageAndPerformInsertions(String file, Map<String, String> insertions) throws FileNotFoundException {
+        return performInsertions(insertions, getRawContent(file));
     }
 
     private String removeDecdnoratorMarks(String content) {
@@ -94,12 +108,11 @@ public class Decorator {
         return content.replaceAll(DECORATE_WITH_REGEX, "");
     }
 
-    protected String getRawContent(PathFinder pathFinder, String file) throws FileNotFoundException {
-        String path = pathFinder.getBasePath();
-        return new Scanner(new File(path, file), charsetName).useDelimiter("\\A").next();
+    public String getRawContent(String file) throws FileNotFoundException {
+        return new Scanner(new File(basePath, file), charsetName).useDelimiter("\\A").next();
     }
 
-    private String performInsertions(Map<String, String> inserts, String content) {
+    public String performInsertions(Map<String, String> inserts, String content) {
         for (String from : inserts.keySet()) {
             content = performInsert(content, from, inserts.get(from));
         }
@@ -113,12 +126,16 @@ public class Decorator {
         return content;
     }
 
-    public HashMap<String, String> extractInserts(String content, String... insertionVars) {
-        return extractInserts(content, makeInsertions(insertionVars));
+    public Map<String, String> extractInserts(String content, String... insertionVars) {
+        return extractInserts(content, makeInsertionKeys(insertionVars, new HashMap<String, String>()));
     }
 
-    public HashMap<String, String> extractInserts(String content, Map<String, String> inserts) {
-        HashMap<String, String> newInserts = new HashMap<String, String>(inserts);
+    public Map<String, String> extractInserts(String content, Map<String, String> inserts, String... insertionVars) {
+        makeInsertionKeys(insertionVars, inserts);
+        return extractInserts(content, inserts);
+    }
+
+    public Map<String, String> extractInserts(String content, Map<String, String> inserts) {
         for (Type type : TYPES) {
             for (String from : inserts.keySet()) {
                 String regex = type.before(from) + "(.*)" + type.after(from);
@@ -127,10 +144,10 @@ public class Decorator {
                     String group = matcher2.group(1);
                     group = group.replaceAll("\\s+$", "");
                     group = group.replaceAll("^\\n", "");
-                    newInserts.put(from, group);
+                    inserts.put(from, group);
                 }
             }
         }
-        return newInserts;
+        return inserts;
     }
 }
