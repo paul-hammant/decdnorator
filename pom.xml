@@ -8,7 +8,7 @@
   <groupId>com.paulhammant</groupId>
   <artifactId>decdnorator-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.7</version>
+  <version>0.8-SNAPSHOT</version>
   <name>decdnorator parent</name>
   <description>Decoration of CDM deployable pages</description>
   <url>http://github.com/paul-hammant/decdnorator</url>
